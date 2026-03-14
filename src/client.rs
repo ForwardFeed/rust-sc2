@@ -727,8 +727,17 @@ fn launch_client(sc2_path: &str, port: i32, sc2_version: Option<&str>) -> Child 
 	let sc2_full_path = format!("{}/Versions/Base{}/{}", sc2_path, base_version, SC2_BINARY);
 
 	let mut process = if cfg!(feature = "wine_sc2") {
-		let wine = std::env::var("WINE").unwrap_or_else(|_| "wine".to_string());
-		let mut command = Command::new(wine);
+		let mut command = match  std::env::var("PROTON") {
+			Ok(proton_targeted) => {
+				let mut command = Command::new(proton_targeted);
+				command.arg("run");
+				command
+			},
+			Err(_) => {
+				let wine = std::env::var("WINE").unwrap_or_else(|_| "wine".to_string());
+				Command::new(wine)
+			},
+		};
 		command.arg(sc2_full_path);
 		command
 	} else {
@@ -751,6 +760,24 @@ fn launch_client(sc2_path: &str, port: i32, sc2_version: Option<&str>) -> Child 
 			sc2_path
 		}
 	};
+	let display_mode =  match std::env::var("DISPLAY_MODE"){
+		Ok(display_mode_selected) => {
+			match display_mode_selected.as_str() {
+				"0" => "0",
+				"1" => "1",
+				_   => {
+					eprintln!(
+						"DISPLAY_MODE: {}, is not valid, expected 0 or 1, defaulting to 0(windowed mode", display_mode_selected
+					);
+					"0"
+				}
+			}
+		},
+		Err(_)=>{
+			// Default to 0 (windowed)
+			"0"
+		}
+	};
 	process
 		.current_dir(cwd)
 		.arg("-listen")
@@ -759,7 +786,7 @@ fn launch_client(sc2_path: &str, port: i32, sc2_version: Option<&str>) -> Child 
 		.arg(port.to_string())
 		// 0 - windowed, 1 - fullscreen
 		.arg("-displayMode")
-		.arg("0");
+		.arg(display_mode.to_string());
 	if !data_hash.is_empty() {
 		process.arg("-dataVersion").arg(data_hash);
 	}
