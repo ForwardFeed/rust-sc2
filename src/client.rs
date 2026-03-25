@@ -766,7 +766,7 @@ fn launch_client(sc2_path: &str, port: i32, sc2_version: Option<&str>) -> Child 
 				"0" => "0",
 				"1" => "1",
 				_   => {
-					eprintln!(
+					error!(
 						"DISPLAY_MODE: {}, is not valid, expected 0 or 1, defaulting to 0(windowed mode", display_mode_selected
 					);
 					"0"
@@ -790,6 +790,17 @@ fn launch_client(sc2_path: &str, port: i32, sc2_version: Option<&str>) -> Child 
 	if !data_hash.is_empty() {
 		process.arg("-dataVersion").arg(data_hash);
 	}
+
+	if let Ok(stdout_file_path) = std::env::var("SC2_CLIENT_OUTPUT_FILE"){
+		match File::create(stdout_file_path){
+			Ok(stdout_file) => {
+				process.stderr(stdout_file);
+			},
+			Err(err) => error!("creating stdout file: {err}"),
+		}
+		
+	}
+	
 	process.spawn().expect("Can't launch SC2 process.")
 }
 
