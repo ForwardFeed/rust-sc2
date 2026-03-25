@@ -420,6 +420,20 @@ impl FromProto<ProtoAlliance> for Alliance {
 	}
 }
 
+impl std::fmt::Display for Alliance {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let str = match self{
+			Alliance::Own => "Own",
+			Alliance::Ally => "Ally",
+			Alliance::Neutral => "Neutral",
+			Alliance::Enemy => "Enemy",
+		};
+        write!(f, "{}", str)
+    }
+}
+
+
 /// Radar point on the map.
 #[derive(Clone)]
 pub struct Radar {
