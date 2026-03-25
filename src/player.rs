@@ -30,7 +30,6 @@ pub enum Race {
 	Random,
 }
 impl std::fmt::Display for Race {
-    // This trait requires `fmt` with this exact signature.
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
 		let str = match self{
 			Race::Terran => "Terran",
@@ -113,7 +112,6 @@ impl IntoProto<ProtoDifficulty> for Difficulty {
 	}
 }
 impl std::fmt::Display for Difficulty {
-    // This trait requires `fmt` with this exact signature.
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
 		let str = match self{
 			Difficulty::VeryEasy => "VeryEasy",
@@ -233,4 +231,17 @@ impl FromProto<ProtoGameResult> for GameResult {
 			ProtoGameResult::Undecided => GameResult::Undecided,
 		}
 	}
+}
+
+
+impl std::fmt::Display for GameResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let str = match self{
+			GameResult::Victory => "Victory",
+			GameResult::Defeat => "Defeat",
+			GameResult::Tie => "Ties",
+			GameResult::Undecided => "Undecided",
+		};
+        write!(f, "{}", str)
+    }
 }
