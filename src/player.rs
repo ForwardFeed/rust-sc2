@@ -29,6 +29,19 @@ pub enum Race {
 	#[default]
 	Random,
 }
+impl std::fmt::Display for Race {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let str = match self{
+			Race::Terran => "Terran",
+			Race::Zerg => "Zerg",
+			Race::Protoss => "Protoss",
+			Race::Random => "Random",
+		};
+        write!(f, "{}", str)
+    }
+}
+
 impl FromProto<ProtoRace> for Race {
 	fn from_proto(race: ProtoRace) -> Self {
 		match race {
@@ -181,6 +194,8 @@ impl Computer {
 		}
 	}
 }
+
+
 
 /// Game result for bot passed to [`on_end`](crate::Player::on_end).
 #[variant_checkers]
