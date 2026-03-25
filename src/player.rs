@@ -112,7 +112,24 @@ impl IntoProto<ProtoDifficulty> for Difficulty {
 		}
 	}
 }
-
+impl std::fmt::Display for Difficulty {
+    // This trait requires `fmt` with this exact signature.
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let str = match self{
+			Difficulty::VeryEasy => "VeryEasy",
+			Difficulty::Easy => "Easy",
+			Difficulty::Medium => "Medium",
+			Difficulty::MediumHard => "MediumHard",
+			Difficulty::Hard => "Hard",
+			Difficulty::Harder => "Harder",
+			Difficulty::VeryHard => "VeryHard",
+			Difficulty::CheatVision => "CheatVision",
+			Difficulty::CheatMoney => "CheatMoney",
+			Difficulty::CheatInsane => "CheatInsane",
+		};
+        write!(f, "{}", str)
+    }
+}
 /// Strategy build of in-game AI.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Copy, Clone, FromStr, Default)]
