@@ -38,6 +38,12 @@ impl Rect {
 	pub fn new(x0: usize, y0: usize, x1: usize, y1: usize) -> Self {
 		Self { x0, y0, x1, y1 }
 	}
+	pub fn contains(&self, x: usize, y: usize) -> bool{
+		x > self.x0 &&
+		x < self.x1 &&
+		y > self.y0 &&
+		y < self.y1
+	}
 }
 
 /// Point on 2D grid, the most frequently used geometric primitive.
