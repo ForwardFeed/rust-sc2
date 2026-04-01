@@ -997,7 +997,10 @@ impl Bot {
 		let all_resources = self
 			.units
 			.resources
-			.filter(|r| r.type_id() != UnitTypeId::MineralField450);
+			.filter(|r| 
+				r.type_id() != UnitTypeId::MineralField450 &&
+				r.mineral_contents() > 7
+			);
 
 		let positions = all_resources
 			.iter()
