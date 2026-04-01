@@ -205,6 +205,16 @@ impl Point2 {
 			z,
 		}
 	}
+	/// Converts 2D Point into a 2D tuple coordinates floored and usized
+	pub fn to_cells_coords(self) -> (usize, usize){
+		let (x, y) = self.floor().as_tuple();
+		(x as usize, y as usize)
+	}
+	/// Converts 2D Point into a 2D tuple coordinates floored and usized
+	pub fn to_cells_coords_inverted_y(self, ymax: usize) -> (usize, usize){
+		let (x, y) = self.floor().as_tuple();
+		(x as usize, (ymax - 1) - y as usize)
+	}
 }
 
 impl PartialEq for Point2 {
