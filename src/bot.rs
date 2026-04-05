@@ -172,6 +172,7 @@ impl LockOwned<u32> for LockU32 {
 	}
 }
 
+#[cfg(feature = "expansions")]
 /// Information about an expansion location.
 #[derive(Debug, Clone)]
 pub struct Expansion {
@@ -456,6 +457,7 @@ pub struct Bot {
 	pub enemy_start_center: Point2,
 	techlab_tags: Rw<FxHashSet<u64>>,
 	reactor_tags: Rw<FxHashSet<u64>>,
+	#[cfg(feature = "expansions")]
 	/// All expansions.
 	pub expansions: Vec<Expansion>,
 	max_cooldowns: Rw<FxHashMap<UnitTypeId, f32>>,
@@ -974,31 +976,20 @@ impl Bot {
 			available_frames: Rs::clone(&self.available_frames),
 		});
 	}
-	pub(crate) fn prepare_start(&mut self) {
-		if let Some(townhall) = self.units.my.townhalls.first() {
-			self.start_location = townhall.position();
-		}
-		if let Some(pos) = self.game_info.start_locations.first() {
-			self.enemy_start = *pos;
-		}
 
-		let resources = self.units.resources.closer(11.0, self.start_location);
-		self.start_center =
-			(resources.sum(|r| r.position()) + self.start_location) / (resources.len() + 1) as f32;
-
-		let resources = self.units.resources.closer(11.0, self.enemy_start);
-		self.enemy_start_center =
-			(resources.sum(|r| r.position()) + self.enemy_start) / (resources.len() + 1) as f32;
+	#[cfg(feature = "expansions")]
+	pub(crate) fn prepare_start_expansions(&mut self){
 
 		// Calculating expansion locations
 		const RESOURCE_SPREAD: f32 = 72.25f32; // 8.5
 		const HEIGHT_DIFFERENCE: u8 = 2; // SAME HEIGHT
-
+		
 		let all_resources = self
 			.units
 			.resources
 			.filter(|r| 
 				r.type_id() != UnitTypeId::MineralField450 &&
+				// filters out mineral walls
 				r.mineral_contents() > 7
 			);
 
@@ -1027,7 +1018,7 @@ impl Bot {
 				16 < d && d <= 64
 			})
 			.collect::<Vec<(isize, isize)>>();
-
+		
 		let mut expansions = resource_groups
 			.into_iter()
 			.filter(|group| group.len() > 1)
@@ -1090,7 +1081,7 @@ impl Bot {
 					let dist = |t: &u64| resources[*t].position().distance_squared(loc);
 					dist(a).partial_cmp(&dist(b)).unwrap_or(std::cmp::Ordering::Equal)
 				});
-
+				
 				Expansion {
 					loc,
 					center,
@@ -1235,6 +1226,26 @@ impl Bot {
 		}
 
 		self.ramps.all = ramps;
+
+	}
+	pub(crate) fn prepare_start(&mut self) {
+		if let Some(townhall) = self.units.my.townhalls.first() {
+			self.start_location = townhall.position();
+		}
+		if let Some(pos) = self.game_info.start_locations.first() {
+			self.enemy_start = *pos;
+		}
+
+		let resources = self.units.resources.closer(11.0, self.start_location);
+		self.start_center =
+			(resources.sum(|r| r.position()) + self.start_location) / (resources.len() + 1) as f32;
+
+		let resources = self.units.resources.closer(11.0, self.enemy_start);
+		self.enemy_start_center =
+			(resources.sum(|r| r.position()) + self.enemy_start) / (resources.len() + 1) as f32;
+
+		#[cfg(feature = "expansions")]
+		self.prepare_start_expansions();
 	}
 	pub(crate) fn prepare_step(&mut self) {
 		let observation = &self.state.observation;
@@ -1489,6 +1500,7 @@ impl Bot {
 		}
 		self.saved_hallucinations.extend(saved_hallucinations);
 
+		#[cfg(feature = "expansions")]
 		for exp in &mut self.expansions {
 			let (alliance, base) = expansions.remove(&exp.loc).unwrap_or((Alliance::Neutral, None));
 			exp.alliance = alliance;
@@ -1844,11 +1856,13 @@ impl Bot {
 			.map(|(geyser, _)| geyser)
 	}
 
+	#[cfg(feature = "expansions")]
 	/// Returns next possible location from [`expansions`](Self::expansions) closest to bot's start location
 	/// or `None` if there aren't any free locations.
 	pub fn get_expansion(&self) -> Option<&Expansion> {
 		self.expansions.iter().find(|exp| exp.alliance.is_neutral())
 	}
+	#[cfg(feature = "expansions")]
 	/// Returns next possible location from [`expansions`](Self::expansions) closest to
 	/// opponent's start location or `None` if there aren't any free locations.
 	pub fn get_enemy_expansion(&self) -> Option<&Expansion> {
@@ -1865,14 +1879,17 @@ impl Bot {
 			.min_by(|(_, path1), (_, path2)| path1.partial_cmp(path2).unwrap_or(std::cmp::Ordering::Equal))
 			.map(|(exp, _)| exp)
 	}
+	#[cfg(feature = "expansions")]
 	/// Returns all [`expansions`](Self::expansions) taken by bot.
 	pub fn owned_expansions(&self) -> impl Iterator<Item = &Expansion> {
 		self.expansions.iter().filter(|exp| exp.alliance.is_mine())
 	}
+	#[cfg(feature = "expansions")]
 	/// Returns all [`expansions`](Self::expansions) taken by opponent.
 	pub fn enemy_expansions(&self) -> impl Iterator<Item = &Expansion> {
 		self.expansions.iter().filter(|exp| exp.alliance.is_enemy())
 	}
+	#[cfg(feature = "expansions")]
 	/// Returns all available [`expansions`](Self::expansions).
 	pub fn free_expansions(&self) -> impl Iterator<Item = &Expansion> {
 		self.expansions.iter().filter(|exp| exp.alliance.is_neutral())
@@ -2599,6 +2616,7 @@ impl Default for Bot {
 			enemy_start_center: Default::default(),
 			techlab_tags: Default::default(),
 			reactor_tags: Default::default(),
+			#[cfg(feature = "expansions")]
 			expansions: Default::default(),
 			max_cooldowns: Default::default(),
 			last_units_hits: Default::default(),

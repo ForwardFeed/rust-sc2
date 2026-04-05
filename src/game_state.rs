@@ -170,12 +170,16 @@ where
 						false
 					}
 			};
-
 			if removed {
 				Some(Alliance::Enemy)
-			} else if bot.expansions.iter_mut().any(|exp| exp.minerals.remove(u)) {
-				Some(Alliance::Neutral)
-			} else {
+			} else{
+				#[cfg(feature = "expansions")]
+				if  bot.expansions.iter_mut().any(|exp| exp.minerals.remove(u)){
+					Some(Alliance::Neutral)
+				} else {
+					None
+				}
+				#[cfg(not(feature = "expansions"))]
 				None
 			}
 		};
