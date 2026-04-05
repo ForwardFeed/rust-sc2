@@ -384,13 +384,14 @@ pub struct Effect {
 }
 
 /// The alliance of unit or effect to your bot.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Alliance {
 	/// Your own objects.
 	Own,
 	/// Owned by your allias (in 2v2, 3v3 an 4v4 games).
 	Ally,
 	/// Just neutral object.
+	#[default]
 	Neutral,
 	/// Owned by your opponent.
 	Enemy,
