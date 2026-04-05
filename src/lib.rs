@@ -46,6 +46,7 @@ extern crate lazy_static;
 #[macro_use]
 extern crate sc2_macro;
 #[macro_use]
+#[cfg(feature = "expansions")]
 extern crate itertools;
 #[macro_use]
 extern crate maplit;

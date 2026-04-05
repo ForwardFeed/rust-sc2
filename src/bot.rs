@@ -15,23 +15,35 @@ use crate::{
 	geometry::{Point2, Point3},
 	ids::{AbilityId, BuffId, EffectId, UnitTypeId, UpgradeId},
 	player::Race,
-	ramp::{Ramp, Ramps},
+	ramp::Ramps,
 	unit::{DataForUnit, SharedUnitData, Unit},
 	units::{AllUnits, Units},
-	utils::{dbscan, range_query},
+	
 	FromProto, IntoProto,
 };
-use indexmap::IndexSet;
+
 use num_traits::ToPrimitive;
 use rand::prelude::*;
-use rustc_hash::{FxHashMap, FxHashSet, FxHasher};
+use rustc_hash::{FxHashMap, FxHashSet};
 use sc2_proto::{
 	query::{RequestQueryBuildingPlacement, RequestQueryPathing},
 	sc2api::Request,
 };
-use std::{fmt, hash::BuildHasherDefault, process::Child};
+use std::{fmt, process::Child};
 
+#[cfg(feature = "expansions")]
 type FxIndexSet<T> = IndexSet<T, BuildHasherDefault<FxHasher>>;
+#[cfg(feature = "expansions")]
+use crate::{
+	ramp::Ramp,
+	utils::{dbscan, range_query}
+};
+#[cfg(feature = "expansions")]
+use indexmap::IndexSet;
+#[cfg(feature = "expansions")]
+use rustc_hash::{FxHasher};
+#[cfg(feature = "expansions")]
+use std::{hash::BuildHasherDefault};
 
 #[cfg(feature = "enemies_cache")]
 use crate::{consts::BURROWED_IDS, unit::DisplayType};

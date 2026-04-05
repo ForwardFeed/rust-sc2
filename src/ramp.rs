@@ -1,11 +1,13 @@
 //! Data structures for storing data of ramps on the map
 //! with methods for extracting useful info from them.
 
+use std::{fmt};
+#[cfg(feature = "expansions")]
 use crate::{bot::Rs, distance::*, geometry::Point2, pixel_map::ByteMap};
+#[cfg(feature = "expansions")]
 use std::{
 	cmp::{Ordering, Reverse},
 	convert::TryInto,
-	fmt,
 };
 
 /// Structured collection of ramps.
@@ -27,9 +29,12 @@ type Pos = (usize, usize);
 pub struct Ramp {
 	/// All points which belong to this ramp.
 	pub points: Vec<Pos>,
+	#[cfg(feature = "expansions")]
 	height: Rs<ByteMap>,
+	#[cfg(feature = "expansions")]
 	start_location: Point2,
 }
+#[cfg(feature = "expansions")]
 impl Ramp {
 	pub(crate) fn new(points: Vec<Pos>, height: &Rs<ByteMap>, start_location: Point2) -> Self {
 		Self {
